@@ -1,11 +1,15 @@
 package vladislav.ru.vkapitest;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -43,8 +47,9 @@ public class myAsyncTask<S, S1, J> extends AsyncTask<String, String, JSONObject>
         return null;
     }
     protected void onPostExecute(JSONObject feed) {
-        // TODO: check this.exception
-        // TODO: do something with the feed
+        /*// TODO: check this.exception
+        // TODO: do something with the feed*/
 
     }
 }
+

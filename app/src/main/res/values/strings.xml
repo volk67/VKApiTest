@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">VKApiTest</string>
+    <string name="my_photo">photo</string>
 </resources>
