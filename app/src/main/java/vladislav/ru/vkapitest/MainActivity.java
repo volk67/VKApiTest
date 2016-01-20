@@ -23,10 +23,6 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.common.api.GoogleApiClient;
-
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -68,13 +64,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void goToMenuLayout() throws ExecutionException, InterruptedException {
         setContentView(R.layout.menu);
-        myAsyncTaskImage<String, String, Bitmap> obj = new myAsyncTaskImage<String,String, Bitmap>();
-        ImageView v= (ImageView)findViewById(R.id.imageView);
-        v.setImageBitmap(photo50);
-        ArrayList<Map<String,Bitmap>> array = new ArrayList<Map<String,Bitmap>>();
-        Map<String,Bitmap> mmm = new HashMap<String, Bitmap>();
-        mmm.put("Friends", photo50);
-        array.add(mmm);
+
         listView = (ListView) findViewById(R.id.listView);
         Menu m = new Menu();
         menuList = m.getMenuList();

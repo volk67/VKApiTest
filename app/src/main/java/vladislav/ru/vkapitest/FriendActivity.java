@@ -2,12 +2,17 @@ package vladislav.ru.vkapitest;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -17,11 +22,24 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
+
+
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  * Created by vladislav on 08.01.16.
@@ -31,79 +49,165 @@ public class FriendActivity extends Activity {
     ArrayList<Bitmap> iconBitmap;
     List<String> friendsId;
     List<String> iconLink;
+    MySimpleAdapter adapter;
+    List<String> FriendsNames;
     ListView listViewFriends;
     JSONObject jsonObject;
+    Handler h;
     int x;
     int count=0;
+
+    public static ArrayList<Map<String,Object>> temp = new ArrayList<Map<String,Object>>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        iconBitmap=new ArrayList<Bitmap>();
         setContentView(R.layout.activity_friends);
         listViewFriends = (ListView) findViewById(R.id.listViewFriends);
 
-        /*myAsyncTask<String, String, JSONObject> obj = new myAsyncTask<String,String, JSONObject>();
-        try {
-            jsonObject = obj.execute("https://api.vk.com/method/friends.get?user_id="+UserData.getUserId()+"&fields=nickname,photo_50").get();
-            friendsNamesList = new Parse().getFriendsFullNamesfromJSONObjects(jsonObject);
 
-            //ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,friendsNamesList);
-            //gridView.add;
-            iconLink = new Parse().getFriendsPhotoLink(jsonObject);
-            friendsId = new Parse().getFriendsId(jsonObject);
-            //listViewFriends.setAdapter(adapter);
-            Log.d("iii",iconLink.get(3));
-            iconBitmap=new ArrayList<Bitmap>(friendsNamesList.size());
+        //listViewFriends.setAdapter(adapter);
 
+       // listViewFriends.addFooterView(listViewFriends);
+        //myAsyncTaskImage<String,Void, Bitmap> my= new myAsyncTask<>();
 
-            } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }*/
-
-        myAS<String,String,JSONObject> my= new myAS();
-        my.execute(" ");
 
         String[] from = { "Photo", "Name" };
-
-// Массив идентификаторов компонентов, в которые будем вставлять данные
-
-        //Log.d("MAIN",iconLink.get(0)+UserData.friendsNamesList.get(0));
         int[] to = { R.id.image, R.id.Name};
-
-        MySimpleAdapter adapter = new MySimpleAdapter(this,UserData.temp,R.layout.forsimpleadapter,from,to);
+        adapter = new MySimpleAdapter(this,temp,R.layout.forsimpleadapter,from,to);
         adapter.setViewBinder(new NewViewBinder());
-        listViewFriends.setAdapter(adapter);
-        //Log.d("MAIN1", my.iconLink.get(1) + my.friendsNamesList.get(1));
 
-        /*for (int i =0;i<friendsNamesList.size();i++)
-        {
-            Map<String,Object> m = new HashMap<String,Object>();
-
-            m.put("Photo", iconBitmap.get(i));
-            m.put("Name", friendsNamesList.get(i));
-            array.add(m);
-        }
-        myAsyncTaskImage<String, Void, Bitmap> objImage = new myAsyncTaskImage<String,Void,Bitmap>();
-        for (int i=0;i<x;i++)
-        try
-        {
-
-                iconBitmap.add(new myAsyncTaskImage<String, Void, Bitmap>().execute(iconLink.get(i)).get());
+        JSONObject jsono = null;
+        myAsyncTaskImage my=new myAsyncTaskImage();
+        my.execute("https://api.vk.com/method/friends.get?user_id="+UserData.getUserId()+"&fields=nickname,photo_50");
+        try {
+            jsono = my.get();
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
             e.printStackTrace();
-        }*/
+        }
+
+        listViewFriends.setAdapter(adapter);
+        try {
+            FriendsNames=new Parse().getFriendsFullNamesfromJSONObjects(jsono);
+            iconLink = new Parse().getFriendsPhotoLink(jsono);
+            friendsId = new Parse().getFriendsId(jsono);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        for (int i=0;i<FriendsNames.size();i++)
+        {
+            Map m = new HashMap<>();
+            m.put("Photo", null);
+            m.put("Name", FriendsNames.get(i));
+            temp.add(m);
+        }
 
 
 
 
+        new myAsyncTaskImage2().execute();
+
+        adapter.notifyDataSetChanged();
 
 
+        h = new Handler() {
+            public void handleMessage(Message msg) {
+                adapter.notifyDataSetChanged();
+
+            };
+        };
+
+
+        listViewFriends.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String s=Long.toString(id);
+                Log.d("id=",view.toString());
+
+                UserData.setCurrentFriend(friendsId.get(position));
+                Intent intent2 = new Intent(FriendActivity.this, PhotoFriends.class);
+                startActivity(intent2);
+
+            }
+        });
+    }
+    class myAsyncTaskImage extends AsyncTask<String, Void, JSONObject> {
+
+        private Exception exception;
+        @Override
+        protected JSONObject doInBackground(String[] urls) {
+            try
+            {
+                URL urlAPI = new URL((java.lang.String)urls[0]);
+                HttpsURLConnection urlConnection;
+                urlConnection = (HttpsURLConnection) urlAPI.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.connect();
+                BufferedReader reader =new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+
+                JSONObject obj = new JSONObject(reader.readLine());
+                return obj;
+            }
+            catch (Exception e)
+            {
+                e.printStackTrace();
+                exception = e;
+            }
+
+            return null;
+        }
+        protected void onPostExecute(Bitmap feed) {
+            // TODO: check this.exception
+            // TODO: do something with the feed
+
+        }
+    }
+    class myAsyncTaskImage2 extends AsyncTask<String, Void, Bitmap> {
+
+        private Exception exception;
+
+        @Override
+        protected Bitmap doInBackground(String[] urls) {
+            try {
+                Log.d("LOG", iconLink.get(0));
+
+
+                for (int i=0;i<FriendsNames.size();i++)
+                {
+                    URL urlAPI = new URL(iconLink.get(i));
+                    HttpURLConnection urlConnection;
+                    urlConnection = (HttpURLConnection) urlAPI.openConnection();
+                    urlConnection.setRequestMethod("GET");
+                    urlConnection.connect();
+                    BufferedInputStream IS = new BufferedInputStream(urlConnection.getInputStream());
+
+                    Bitmap map=(Bitmap) BitmapFactory.decodeStream(IS);
+                    iconBitmap.add(map);
+                    Map m = new HashMap<String,Object>();
+                    m.put("Photo", iconBitmap.get(i));
+                    m.put("Name", FriendsNames.get(i));
+
+                    temp.remove(i);
+                    temp.add(i, m);
+                    h.sendEmptyMessage(0);
+                }
+                return null;
+            } catch (Exception e) {
+                e.printStackTrace();
+                exception = e;
+            }
+
+            return null;
+        }
+
+        protected void onPostExecute(Bitmap feed) {
+            // TODO: check this.exception
+            // TODO: do something with the feed
+
+        }
     }
     class MySimpleAdapter extends SimpleAdapter {
         Context context;
@@ -117,13 +221,7 @@ public class FriendActivity extends Activity {
 
         @Override
         public void setViewText(TextView v, String text) {
-            // метод супер-класса, который вставляет текст
             super.setViewText(v, text);
-            //if (v.getId() == R.id.image)
-             //   v.setText();
-/*            v.setText(friendsNamesList.get(count));
-            count++;
-*/
         }
 
         @Override
@@ -135,13 +233,12 @@ public class FriendActivity extends Activity {
             // разрисовываем ImageView
 
         }
-        /*@Override
+       /* @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             // используем созданные, но не используемые view
 
             return convertView;
         }*/
-
     }
 
     public class NewViewBinder implements SimpleAdapter.ViewBinder {

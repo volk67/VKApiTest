@@ -13,6 +13,7 @@ import java.util.Map;
  */
 public class UserData
 {
+    private static String currentFriend;
     private static String accessToken;
     private static String userId;
     private static JSONArray friends;
@@ -65,5 +66,13 @@ public class UserData
 
     public static ArrayList<Bitmap> getIconBitmap() {
         return iconBitmap;
+    }
+
+    public static String getCurrentFriend() {
+        return currentFriend;
+    }
+
+    public static void setCurrentFriend(String currentFriend) {
+        UserData.currentFriend = currentFriend;
     }
 }
