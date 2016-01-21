@@ -125,11 +125,20 @@ public class FriendActivity extends Activity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 String s=Long.toString(id);
-                Log.d("id=",view.toString());
+                Log.d("id=", view.toString());
+                if (position<10)
+                {
+                    UserData.setCurrentFriend(friendsId.get(position));
+                    Intent intent2 = new Intent(FriendActivity.this, PhotoFriends.class);
+                    startActivity(intent2);
+                }
+                else
+                {
+                    UserData.setCurrentFriend(friendsId.get(position));
+                    Intent messagesIntent = new Intent(FriendActivity.this, MessagesActivity.class);
+                    startActivity(messagesIntent);
+                }
 
-                UserData.setCurrentFriend(friendsId.get(position));
-                Intent intent2 = new Intent(FriendActivity.this, PhotoFriends.class);
-                startActivity(intent2);
 
             }
         });
@@ -175,7 +184,7 @@ public class FriendActivity extends Activity {
                 Log.d("LOG", iconLink.get(0));
 
 
-                for (int i=0;i<FriendsNames.size();i++)
+                for (int i=0;i<FriendsNames.size()/10;i++)
                 {
                     URL urlAPI = new URL(iconLink.get(i));
                     HttpURLConnection urlConnection;

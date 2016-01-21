@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         // включаем поддержку JavaScript
         webView.getSettings().setJavaScriptEnabled(true);
         // указываем страницу загрузки
-        webView.loadUrl("https://oauth.vk.com/authorize?client_id=5217160&scope=offline,photos,friends&response_type=token&v=5.40");
+        webView.loadUrl("https://oauth.vk.com/authorize?client_id=5217160&scope=messages,offline,photos,friends&response_type=token&v=5.40");
 
     }
 
