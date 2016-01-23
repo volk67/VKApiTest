@@ -80,7 +80,7 @@ public class FriendActivity extends Activity {
 
         JSONObject jsono = null;
         myAsyncTaskImage my=new myAsyncTaskImage();
-        my.execute("https://api.vk.com/method/friends.get?user_id="+UserData.getUserId()+"&fields=nickname,photo_50");
+        my.execute("https://api.vk.com/method/friends.get?user_id="+UserData.getUserId()+"&order=hints&fields=nickname,photo_50");
         try {
             jsono = my.get();
         } catch (InterruptedException e) {
@@ -156,8 +156,9 @@ public class FriendActivity extends Activity {
                 urlConnection.setRequestMethod("GET");
                 urlConnection.connect();
                 BufferedReader reader =new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-
-                JSONObject obj = new JSONObject(reader.readLine());
+                String s = reader.readLine();
+                Log.d("Friends",s);
+                JSONObject obj = new JSONObject(s);
                 return obj;
             }
             catch (Exception e)
