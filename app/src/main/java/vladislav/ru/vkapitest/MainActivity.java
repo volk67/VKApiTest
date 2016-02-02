@@ -34,13 +34,11 @@ import java.util.concurrent.ExecutionException;
 public class MainActivity extends AppCompatActivity {
 
 
-    ImageView myImage;
     WebView webView;
     UserData myUserData;
     ListView listView;
     ArrayList<String> menuList;
-    Bitmap photo50;
-
+    UserData user = workApi.getUser();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,20 +59,15 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-
+//переход к меню
     public void goToMenuLayout() throws ExecutionException, InterruptedException {
         setContentView(R.layout.menu);
 
         listView = (ListView) findViewById(R.id.listView);
         Menu m = new Menu();
         menuList = m.getMenuList();
-
-
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,menuList);
-
-
         listView.setAdapter(adapter);
-
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -94,11 +87,8 @@ public class MainActivity extends AppCompatActivity {
         public void onPageStarted(WebView view, String url, Bitmap favicon) {
             super.onPageStarted(view, url, favicon);
             if (url.startsWith("https://oauth.vk.com/blank.html")) {
-                myUserData.setAccessToken(Parse.getAccessToken(url));
-                myUserData.setUserId(Parse.getUserId(url));
-
-                Log.d("TAG", myUserData.getAccessToken());
-                Log.d("TAG", myUserData.getUserId());
+                user.setAccessToken(Parse.getAccessToken(url));
+                user.setCurrentUserId(Parse.getUserId(url));
 
                 try {
                     goToMenuLayout();
@@ -137,10 +127,8 @@ public class MainActivity extends AppCompatActivity {
         private ArrayList<String> menuList;
 
         public Menu() {
-            Log.d("pf", "pfitk");
             menuList = new ArrayList<String>();
             menuList.add("Friends");
-            Log.d("t", menuList.get(0));
         }
 
         public ArrayList<String> getMenuList() {

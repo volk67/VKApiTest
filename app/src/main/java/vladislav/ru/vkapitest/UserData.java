@@ -13,51 +13,45 @@ import java.util.Map;
  */
 public class UserData
 {
-    private static String currentFriend;
     private static String accessToken;
-    private static String userId;
-    private static JSONArray friends;
-    private static ArrayList<String> friendNamesList= new ArrayList<String>();
-    private static ArrayList<String> iconLink=new ArrayList<String>();
+    private static String currentUserId;
+    private static List<Friend> myFriends;
     public static ArrayList<Map<String,Object>> temp = new ArrayList<Map<String,Object>>();
-
+    private static String currentFriend;
     private static ArrayList<Bitmap> iconBitmap=new ArrayList<Bitmap>();
 
-    public static String getUserId() {
-        return userId;
+    public static void addNew(Friend friend)
+    {
+        myFriends.add(friend);
+    }
+
+    public static void addNew(String userId)
+    {
+        Friend friend = new Friend("userId");
+    }
+
+    public void setMyFriends(List<Friend> myFriends) {
+        UserData.myFriends = myFriends;
+    }
+
+    public List<Friend> getMyFriends() {
+        return myFriends;
+    }
+
+    public static String getCurrentUserId() {
+        return currentUserId;
     }
 
     public static String getAccessToken() {
         return accessToken;
     }
 
-    public static void setUserId(String userId) {
-        UserData.userId = userId;
+    public static void setCurrentUserId(String userId) {
+        UserData.currentUserId = userId;
     }
 
     public static void setAccessToken(String accessToken) {
         UserData.accessToken = accessToken;
-    }
-
-    public static void setFriends(JSONArray friends) {
-        UserData.friends = friends;
-    }
-
-    public static void setFriendNames(ArrayList<String> friendNames) {
-        UserData.friendNamesList = friendNames;
-    }
-
-    public static ArrayList<String> getFriendNamesList() {
-        return friendNamesList;
-    }
-
-
-    public static ArrayList<String> getIconLink() {
-        return iconLink;
-    }
-
-    public static void setIconLink(ArrayList<String> iconLink) {
-        UserData.iconLink = iconLink;
     }
 
     public static void setIconBitmap(ArrayList<Bitmap> iconBitmap) {
