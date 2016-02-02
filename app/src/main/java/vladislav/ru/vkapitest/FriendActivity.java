@@ -122,15 +122,17 @@ public class FriendActivity extends Activity {
         @Override
         protected Bitmap doInBackground(String[] urls) {
             try {
-                for (int i=0;i<user.getMyFriends().size();i++)
+                int i=0;
+                for (Friend friend:user.getMyFriends())
                 {
-                    Bitmap map=new workApi().downLoadPhoto(user.getMyFriends().get(i).getAvatar_url());
-                    iconBitmap.add(map);
+
+                    friend.downLoadAvatar();
                     Map m = new HashMap<>();
-                    m.put("Photo", iconBitmap.get(i));
-                    m.put("Name", user.getMyFriends().get(i).getFullName());
+                    m.put("Photo", friend.getAvatar());
+                    m.put("Name", friend.getFullName());
                     temp.remove(i);
                     temp.add(i, m);
+                    i++;
                     handler.sendEmptyMessage(0);
                 }
                 return null;

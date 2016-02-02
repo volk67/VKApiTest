@@ -20,30 +20,13 @@ import android.os.Handler;
 public class workApi
 {
     private static UserData user = new UserData();
-    Handler handler;
 
     public static UserData getUser() {
         return user;
     }
 
-
     public void setUserFriends() throws IOException, JSONException {
         user.setMyFriends(getFriendsList());
-    }
-
-    private void connect()
-    {
-
-    }
-
-    public void downLoadPhotos() throws IOException {
-        for (int i=0;i<user.getMyFriends().size();i++)
-        {
-            user.getMyFriends().get(i).addAvatar(downLoadPhoto(user.getMyFriends().get(i).getAvatar_url()));
-        }
-    }
-    public Bitmap downLoadPhoto(String url) throws IOException {
-        return new NetWork().readBitmap(url);
     }
 
     private List<Friend> getFriendsList() throws IOException, JSONException
@@ -54,7 +37,6 @@ public class workApi
         List<String> friendsNameList = getFriendsFullNames(object);
         List<String> friendUiList = getFriendsId(object);
         List<String> friendsPhotoLink = getFriendsPhotoLink(object);
-
         for (int i=0;i<friendsNameList.size();i++)
         {
             friendsList.add(new Friend(friendUiList.get(i),friendsNameList.get(i),friendsPhotoLink.get(i)));
@@ -63,10 +45,8 @@ public class workApi
     }
 
     private List<String> getFriendsFullNames(JSONObject jsonObject) throws JSONException {
-
-        JSONArray jsonArray = new JSONArray();
+        JSONArray jsonArray = jsonObject.getJSONArray("response");
         List<String> friendsNames = new ArrayList<>();
-        jsonArray = jsonObject.getJSONArray("response");
         for (int i=0;i<jsonArray.length();i++)
         {
             friendsNames.add(jsonArray.getJSONObject(i).getString("first_name")+" "+jsonArray.getJSONObject(i).getString("last_name"));
@@ -74,9 +54,8 @@ public class workApi
         return friendsNames;
     }
     private List<String> getFriendsId(JSONObject jsonObject) throws JSONException {
-        JSONArray jsonArray = new JSONArray();
+        JSONArray jsonArray = jsonObject.getJSONArray("response");
         List<String> friendsPhotoLink = new ArrayList<String>();
-        jsonArray = jsonObject.getJSONArray("response");
         for (int i=0;i<jsonArray.length();i++)
         {
             friendsPhotoLink.add(jsonArray.getJSONObject(i).getString("uid"));
@@ -84,9 +63,8 @@ public class workApi
         return friendsPhotoLink;
     }
     private List<String> getFriendsPhotoLink(JSONObject jsonObject) throws JSONException {
-        JSONArray jsonArray = new JSONArray();
+        JSONArray jsonArray = jsonObject.getJSONArray("response");
         List<String> friendsPhotoLink = new ArrayList<String>();
-        jsonArray = jsonObject.getJSONArray("response");
         for (int i=0;i<jsonArray.length();i++)
         {
             friendsPhotoLink.add(jsonArray.getJSONObject(i).getString("photo_50"));

@@ -16,19 +16,9 @@ public class UserData
     private static String accessToken;
     private static String currentUserId;
     private static List<Friend> myFriends;
-    public static ArrayList<Map<String,Object>> temp = new ArrayList<Map<String,Object>>();
+    //public static ArrayList<Map<String,Object>> temp = new ArrayList<Map<String,Object>>();
     private static String currentFriend;
     private static ArrayList<Bitmap> iconBitmap=new ArrayList<Bitmap>();
-
-    public static void addNew(Friend friend)
-    {
-        myFriends.add(friend);
-    }
-
-    public static void addNew(String userId)
-    {
-        Friend friend = new Friend("userId");
-    }
 
     public void setMyFriends(List<Friend> myFriends) {
         UserData.myFriends = myFriends;

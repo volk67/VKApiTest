@@ -2,6 +2,7 @@ package vladislav.ru.vkapitest;
 
 import android.graphics.Bitmap;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -15,10 +16,7 @@ public class Friend
     private Bitmap avatar;
     private List<Bitmap> photos;
 
-    Friend()
-    {
-
-    }
+    Friend(){}
 
     Friend(String userId)
     {
@@ -35,6 +33,11 @@ public class Friend
         this.fullName=fullName;
         this.avatar_url=avatar_url;
     }
+
+    public void downLoadAvatar() throws IOException {
+        avatar = new NetWork().readBitmap(avatar_url);
+    }
+
     public String getUserId() {
         return userId;
     }
@@ -59,11 +62,11 @@ public class Friend
         this.avatar_url = avatar_url;
     }
 
-    public void addAvatar(Bitmap bitmap)
-    {
-        this.avatar=bitmap;
+    public Bitmap getAvatar() {
+        return avatar;
     }
 
-
-
+    public void setAvatar(Bitmap avatar) {
+        this.avatar = avatar;
+    }
 }
