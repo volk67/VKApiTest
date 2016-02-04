@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 
 import org.json.JSONArray;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,8 @@ public class UserData
 {
     private static String accessToken;
     private static String currentUserId;
+    private String avatarUrl;
+    private Bitmap avatar;
     private static List<Friend> myFriends;
     //public static ArrayList<Map<String,Object>> temp = new ArrayList<Map<String,Object>>();
     private static String currentFriend;
@@ -28,7 +31,7 @@ public class UserData
         return myFriends;
     }
 
-    public static String getCurrentUserId() {
+    public String getCurrentUserId() {
         return currentUserId;
     }
 
@@ -58,5 +61,24 @@ public class UserData
 
     public static void setCurrentFriend(String currentFriend) {
         UserData.currentFriend = currentFriend;
+    }
+
+    public Bitmap getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(Bitmap avatar) {
+        this.avatar = avatar;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
+    public void downLoadAvatar() throws IOException {
+        this.avatar=new NetWork().readBitmap(avatarUrl);
     }
 }

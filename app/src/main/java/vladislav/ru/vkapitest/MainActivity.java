@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.Image;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -23,8 +24,10 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -64,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.menu);
 
         listView = (ListView) findViewById(R.id.listView);
+        new DownLoadAvatar().execute();
         Menu m = new Menu();
         menuList = m.getMenuList();
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,menuList);
@@ -80,6 +84,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    class DownLoadAvatar extends AsyncTask<String, Void, Void> {
+        @Override
+        protected Void doInBackground(String[] urls)
+        {
+            try {
+                new workApi().downLoadAvatar();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
 
 
     private class MyWebViewClient extends WebViewClient {

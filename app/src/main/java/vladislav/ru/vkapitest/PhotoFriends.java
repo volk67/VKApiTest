@@ -1,6 +1,7 @@
 package vladislav.ru.vkapitest;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -28,21 +29,26 @@ import java.util.Map;
  */
 public class PhotoFriends extends Activity {
 
-    List<Map<String,Object>> list = new ArrayList<Map<String,Object>>();
-    List<String> strList = new ArrayList<>();
-    String CurrentId;
+    Friend friend;
+    List<String> urlsList=new ArrayList<>();
+    UserData user = workApi.getUser();
+    List<Map<String,Object>> list;
     GridView gridView;
     ImageAdapter adapter;
-    Handler handler;
+    Handler handler, handlerDidFinished;
     boolean flag=true;
     int offset=0;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        list =new ArrayList<>();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo);
-        DownLoadPhotos photos = new DownLoadPhotos();
-        photos.execute();
+        Intent intent = getIntent();
+        int position = intent.getIntExtra("position", 0);
+        friend = user.getMyFriends().get(position);
+
+        new DownLoadURLS().execute();
 
         gridView = (GridView)findViewById(R.id.gridView);
         gridView.setNumColumns(4);
@@ -55,15 +61,16 @@ public class PhotoFriends extends Activity {
         handler = new Handler() {
             public void handleMessage(Message msg) {
                 adapter.notifyDataSetChanged();
-                Log.d("Cignal","+");
-
             };
         };
 
-        DownLoadImage downLoadImage = new DownLoadImage();
-        downLoadImage.execute();
+        handlerDidFinished = new Handler() {
+            public void handleMessage(Message msg) {
+                new DownLoadImage().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            };
+        };
 
-        gridView.setOnScrollListener(new AbsListView.OnScrollListener() {
+        /*gridView.setOnScrollListener(new AbsListView.OnScrollListener() {
 
             @Override
             public void onScrollStateChanged(AbsListView arg0, int arg1) {
@@ -73,33 +80,27 @@ public class PhotoFriends extends Activity {
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 if (visibleItemCount > 0 && firstVisibleItem + visibleItemCount == totalItemCount&&flag) {
                     flag=false;
-                    new DownLoadPhotos().execute();
-                    new DownLoadImage().execute();
+                    new DownLoadURLS().execute();
+                    new DownLoadImage().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
             }
-        });
+        });*/
     }
 
 
 
 
 
-    class DownLoadPhotos extends AsyncTask<String,Void,Void>
+    class DownLoadURLS extends AsyncTask<String,Void,Void>
     {
         private Exception exception;
         @Override
         protected Void doInBackground(String... urls)
         {
             try {
-                CurrentId=UserData.getCurrentFriend();
-                String str = new NetWork().readData("https://api.vk.com/method/photos.getAll?owner_id="+CurrentId+"&count="+20+"&offset="+offset+"&access_token="+UserData.getAccessToken());
+                urlsList.addAll(new workApi().downLoadPhotosUrls(offset, friend.getUserId()));
                 offset+=20;
-                JSONObject obj = new JSONObject(str);
-                new Parse().parser(obj);
-
-                for(int i=offset-20;i<strList.size();i++)
-                    list.add(null);
-
+                handlerDidFinished.sendEmptyMessage(0);
 
             }
             catch (Exception e)
@@ -117,14 +118,12 @@ public class PhotoFriends extends Activity {
         @Override
         protected Void doInBackground(String... urls)
         {
-            for (int i=offset-20;i<strList.size();i++)
+            for (int i=offset-20;i<urlsList.size();i++)
             {
                 try {
-                    Bitmap map=new NetWork().readBitmap(strList.get(i));
+                    Bitmap map=new NetWork().readBitmap(urlsList.get(i));
                     Map<String,Object> m= new HashMap<>();
                     m.put("Photo", map);
-
-                    list.remove(i);
                     list.add(i, m);
                     handler.sendEmptyMessage(0);
 
@@ -135,20 +134,6 @@ public class PhotoFriends extends Activity {
                 }
             }
             flag=true;
-            return null;
-        }
-    }
-
-    class Parse
-    {
-        public List<String> parser(JSONObject jsonObject) throws JSONException
-        {
-            JSONArray jsonArray = new JSONArray();
-            jsonArray= jsonObject.getJSONArray("response");
-            for (int i=1;i<jsonArray.length();i++)
-            {
-                strList.add(jsonArray.getJSONObject(i).getString("src"));
-            }
             return null;
         }
     }

@@ -3,6 +3,7 @@ package vladislav.ru.vkapitest;
 import android.graphics.Bitmap;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,7 +15,11 @@ public class Friend
     private String fullName;
     private String avatar_url;
     private Bitmap avatar;
+    private List<String> photosUrl = new ArrayList<>();
     private List<Bitmap> photos;
+    private List<String> messages = new ArrayList<>();
+    private List<String> fromTo = new ArrayList<>();
+
 
     Friend(){}
 
@@ -68,5 +73,43 @@ public class Friend
 
     public void setAvatar(Bitmap avatar) {
         this.avatar = avatar;
+    }
+
+    public List<String> getPhotosUrl() {
+        return photosUrl;
+    }
+
+    public void setPhotosUrl(List<String> photosUrl) {
+        this.photosUrl = photosUrl;
+    }
+
+    public void addPhotosUrl(List<String> photosUrl)
+    {
+        this.photosUrl.addAll(photosUrl);
+    }
+
+    public List<String> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(List<String> messages) {
+        this.messages = messages;
+    }
+
+    public void addMessages(List<String> messages)
+    {
+        this.messages.addAll(messages);
+    }
+
+    public List<String> getFromTo() {
+        return fromTo;
+    }
+
+    public void setFromTo(List<String> fromTo) {
+        this.fromTo = fromTo;
+    }
+    public void addFromTo(List<String> messages)
+    {
+        this.fromTo.addAll(messages);
     }
 }

@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import android.os.Handler;
+import android.util.Log;
 
 /**
  * Created by vladislav on 24.01.16.
@@ -29,47 +30,82 @@ public class workApi
         user.setMyFriends(getFriendsList());
     }
 
+    public void downFriendUrls(int offset, Friend friend) throws IOException, JSONException {
+        try {
+            friend.addPhotosUrl(downLoadPhotosUrls(offset, friend.getUserId()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+
     private List<Friend> getFriendsList() throws IOException, JSONException
     {
         List<Friend> friendsList = new ArrayList<>();
-        String friends = new NetWork().readData("https://api.vk.com/method/friends.get?user_id="+workApi.user.getCurrentUserId()+"&fields=nickname,photo_50&order=hints");
+        String friends = new NetWork().readData("https://api.vk.com/method/friends.get?user_id=" + workApi.user.getCurrentUserId() + "&fields=nickname,photo_50&order=hints");
         JSONObject object = new JSONObject(friends);
-        List<String> friendsNameList = getFriendsFullNames(object);
-        List<String> friendUiList = getFriendsId(object);
-        List<String> friendsPhotoLink = getFriendsPhotoLink(object);
-        for (int i=0;i<friendsNameList.size();i++)
+        JSONArray jsonArray = object.getJSONArray("response");
+        for (int i=0;i<jsonArray.length();i++)
         {
-            friendsList.add(new Friend(friendUiList.get(i),friendsNameList.get(i),friendsPhotoLink.get(i)));
+            String name=jsonArray.getJSONObject(i).getString("first_name")+" "+jsonArray.getJSONObject(i).getString("last_name");
+            String uid=jsonArray.getJSONObject(i).getString("uid");
+            String avatarUrl=jsonArray.getJSONObject(i).getString("photo_50");
+            friendsList.add(new Friend(uid,name,avatarUrl));
         }
         return friendsList;
     }
 
-    private List<String> getFriendsFullNames(JSONObject jsonObject) throws JSONException {
-        JSONArray jsonArray = jsonObject.getJSONArray("response");
-        List<String> friendsNames = new ArrayList<>();
-        for (int i=0;i<jsonArray.length();i++)
+
+    public List<String> downLoadPhotosUrls(int offset, String uid) throws IOException, JSONException {
+        List<String> urlList = new ArrayList<>();
+        String urls = new NetWork().readData("https://api.vk.com/method/photos.getAll?owner_id="+uid+"&count="+20+"&offset="+offset+"&access_token="+UserData.getAccessToken());
+        JSONObject object = new JSONObject(urls);
+        JSONArray jsonArray = object.getJSONArray("response");
+        for (int i=1;i<jsonArray.length();i++)
         {
-            friendsNames.add(jsonArray.getJSONObject(i).getString("first_name")+" "+jsonArray.getJSONObject(i).getString("last_name"));
+            urlList.add(jsonArray.getJSONObject(i).getString("src"));
         }
-        return friendsNames;
-    }
-    private List<String> getFriendsId(JSONObject jsonObject) throws JSONException {
-        JSONArray jsonArray = jsonObject.getJSONArray("response");
-        List<String> friendsPhotoLink = new ArrayList<String>();
-        for (int i=0;i<jsonArray.length();i++)
-        {
-            friendsPhotoLink.add(jsonArray.getJSONObject(i).getString("uid"));
-        }
-        return friendsPhotoLink;
-    }
-    private List<String> getFriendsPhotoLink(JSONObject jsonObject) throws JSONException {
-        JSONArray jsonArray = jsonObject.getJSONArray("response");
-        List<String> friendsPhotoLink = new ArrayList<String>();
-        for (int i=0;i<jsonArray.length();i++)
-        {
-            friendsPhotoLink.add(jsonArray.getJSONObject(i).getString("photo_50"));
-        }
-        return friendsPhotoLink;
+
+        return urlList;
     }
 
+    public List<List<String>> downLoadMessages(int offset, String uid) throws IOException, JSONException {
+        List<String> messagesList = new ArrayList<>();
+        List<String> messagesListFromTo = new ArrayList<>();
+        String messages = new NetWork().readData("https://api.vk.com/method/messages.getHistory?user_id=" + uid + "&access_token=" + UserData.getAccessToken()+"&count=20");
+        JSONObject jsonObject= new JSONObject(messages);
+        JSONArray jsonArray= jsonObject.getJSONArray("response");
+        Log.d("messages", messages);
+        for (int i=1;i<jsonArray.length();i++)
+        {
+            messagesList.add(jsonArray.getJSONObject(i).getString("body"));
+            messagesListFromTo.add(jsonArray.getJSONObject(i).getString("out"));
+        }
+        List<List<String>> list = new ArrayList<>();
+        list.add(messagesList);
+        list.add(messagesListFromTo);
+        return list;
+    }
+
+
+    public void downLoadAvatarUrl() throws IOException, JSONException {
+        String me = new NetWork().readData("https://api.vk.com/method/users.get?user_id="+user.getCurrentUserId()+"&fields=photo_50");
+        JSONObject jsonObject = new JSONObject(me);
+        String url = jsonObject.getJSONArray("response").getJSONObject(0).getString("photo_50");
+        user.setAvatarUrl(url);
+    }
+    public void downLoadAvatar() throws IOException, JSONException {
+        downLoadAvatarUrl();
+        Bitmap avatar = new NetWork().readBitmap(user.getAvatarUrl());
+        user.setAvatar(avatar);
+    }
+
+    public void sendMessage(String uid, String message) throws IOException {
+        String mess = new NetWork().readData("https://api.vk.com/method/messages.send?uid="+uid+"&message="+message+"&access_token=" + UserData.getAccessToken());
+        Log.d("mess",mess);
+        String s="https://api.vk.com/method/messages.send?uid="+uid+"&message="+message+"&access_token=" + UserData.getAccessToken();
+        Log.d("quest", s);
+    }
 }

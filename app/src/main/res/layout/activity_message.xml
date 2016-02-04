@@ -8,20 +8,27 @@
         android:layout_width="match_parent"
         android:layout_height="368dp"
         android:id="@+id/listViewMessages"
-        android:layout_weight="0.80" />
+        android:layout_weight="1.04" />
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="55dp"
-        android:text="s"
-        android:id="@+id/button"
-        android:layout_gravity="right"
-        android:layout_weight="0.80" />
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="59dp"
+        android:weightSum="1">
 
-    <EditText
-        android:layout_width="312dp"
-        android:layout_height="55dp"
-        android:id="@+id/editText" />
+        <EditText
+            android:layout_width="186dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/editText"
+            android:layout_weight="0.87" />
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="send"
+            android:id="@+id/button"
+            android:onClick="onSendButtonClick"/>
+    </LinearLayout>
 
 </LinearLayout>
