@@ -17,6 +17,7 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.TabHost;
 import android.widget.TextView;
 
 
@@ -31,52 +32,97 @@ import java.util.Map;
  */
 public class FriendActivity extends Activity {
 
-    FriendsActivityAdapter adapter;
-    ListView listViewFriends;
+    FriendsActivityAdapter adapter,adapter2;
+    ListView listViewFriends,listViewFriendsOnline;
     Handler handler;
     UserData user = workApi.getUser();
 
+
+
     public static ArrayList<Map<String,Object>> temp = new ArrayList<Map<String,Object>>();
+
+    public static ArrayList<Map<String,Object>> tempOnline = new ArrayList<Map<String,Object>>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_friends);
-        listViewFriends = (ListView)findViewById(R.id.listViewFriends);
+        final TabHost tabHost = (TabHost)findViewById(R.id.tabHost);
+        tabHost.setup();
+        TabHost.TabSpec tabSpec;
+        tabSpec = tabHost.newTabSpec("tag1");
+        tabSpec.setIndicator("друзья");
+        tabSpec.setContent(R.id.linearLayout);
+        tabHost.addTab(tabSpec);
+
+        tabSpec = tabHost.newTabSpec("tag2");
+        tabSpec.setIndicator("в сети");
+        tabSpec.setContent(R.id.linearLayout2);
+        tabHost.addTab(tabSpec);
+
+
+        /*tabHost.setOnTabChangedListener(new TabHost.OnTabChangeListener() {
+            @Override
+            public void onTabChanged(String tabId) {
+                if (tabId.equals("tag1"))
+                {
+
+                }
+            }
+        });*/
+
+        listViewFriends = (ListView) findViewById(R.id.listViewFriends);
+        listViewFriendsOnline = (ListView) findViewById(R.id.listViewFriendsOnline);
 
         String[] from = { "Photo", "Name" };
         int[] to = { R.id.image, R.id.Name};
         adapter = new FriendsActivityAdapter(this,temp,R.layout.forsimpleadapter,from,to);
         adapter.setViewBinder(new myBinder());
+        adapter2 = new FriendsActivityAdapter(this,tempOnline,R.layout.forsimpleadapter,from,to);
         new DownLoadFriendsList().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        //new DownLoadFriendsOnlineList().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 
         listViewFriends.setAdapter(adapter);
+        listViewFriendsOnline.setAdapter(adapter2);
 
 
-        handler = new Handler() {
-            public void handleMessage(Message msg) {
-                adapter.notifyDataSetChanged();
 
-            };
-        };
 
         listViewFriends.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String s=Long.toString(id);
-                Log.d("id=",s+" "+position+view.toString());
+                String s = Long.toString(id);
+                Log.d("id=", s + " " + position + view.toString());
             }
         });
 
         listViewFriends.setOnScrollListener(new AbsListView.OnScrollListener() {
+            int first, count;
+
+            @Override
+            public void onScrollStateChanged(AbsListView arg0, int arg1) {
+                if (arg1 == 0)
+                    for (int i = first; i < first + count; i++) {
+                        new DownLoadImage().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, i);
+                    }
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                first = firstVisibleItem;
+                count = visibleItemCount;
+            }
+        });
+
+        listViewFriendsOnline.setOnScrollListener(new AbsListView.OnScrollListener() {
             int first,count;
             @Override
             public void onScrollStateChanged(AbsListView arg0, int arg1) {
                 if (arg1==0)
                     for (int i=first;i<first+count;i++)
                     {
-                        new DownLoadImage().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,i);
+                        new DownLoadImageO().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,i);
                     }
             }
 
@@ -113,10 +159,46 @@ public class FriendActivity extends Activity {
                 Map m = new HashMap<>();
                 m.put("Photo", null);
                 m.put("Name", user.getMyFriends().get(i).getFullName());
+                m.put("Friend", user.getMyFriends().get(i));
                 temp.add(m);
+                if(user.getMyFriends().get(i).isOnline())
+                    tempOnline.add(m);
             }
 
             adapter.notifyDataSetChanged();
+            adapter2.notifyDataSetChanged();
+        }
+    }
+
+
+    class DownLoadImageO extends AsyncTask<Integer, Void, Void> {
+        private Exception exception;
+        @Override
+        protected Void doInBackground(Integer[] nums) {
+            try {
+                if (tempOnline.get(nums[0]).get("Photo")==null)
+                {
+                    Friend friendd = (Friend)tempOnline.get(nums[0]).get("Friend");
+                    friendd.downLoadAvatar();
+                    Map m = new HashMap<>();
+                    m.put("Photo", friendd.getAvatar());
+                    m.put("Name", friendd.getFullName());
+                    m.put("Friend",friendd);
+
+                    tempOnline.set(nums[0], m);
+                }
+
+                return null;
+            } catch (Exception e) {
+                e.printStackTrace();
+                exception = e;
+            }
+            return null;
+        }
+
+        protected void onPostExecute(Void feed) {
+            super.onPostExecute(feed);
+            adapter2.notifyDataSetChanged();
         }
     }
 
@@ -126,13 +208,13 @@ public class FriendActivity extends Activity {
         @Override
         protected Void doInBackground(Integer[] nums) {
             try {
-                if (user.getMyFriends().get(nums[0]).getAvatar()==null)
+                if (temp.get(nums[0]).get("Photo")==null)
                 {
                     user.getMyFriends().get(nums[0]).downLoadAvatar();
                     Map m = new HashMap<>();
                     m.put("Photo", user.getMyFriends().get(nums[0]).getAvatar());
                     m.put("Name", user.getMyFriends().get(nums[0]).getFullName());
-                    temp.set(nums[0],m);
+                    temp.set(nums[0], m);
                 }
 
                 return null;

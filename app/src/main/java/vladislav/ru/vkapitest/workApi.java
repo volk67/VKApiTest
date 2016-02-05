@@ -30,6 +30,10 @@ public class workApi
         user.setMyFriends(getFriendsList());
     }
 
+    public void setUserFriendsOnline() throws IOException, JSONException {
+        user.setMyFriendsOnline(getFriendsOnlineList());
+    }
+
     public void downFriendUrls(int offset, Friend friend) throws IOException, JSONException {
         try {
             friend.addPhotosUrl(downLoadPhotosUrls(offset, friend.getUserId()));
@@ -44,7 +48,8 @@ public class workApi
     private List<Friend> getFriendsList() throws IOException, JSONException
     {
         List<Friend> friendsList = new ArrayList<>();
-        String friends = new NetWork().readData("https://api.vk.com/method/friends.get?user_id=" + workApi.user.getCurrentUserId() + "&fields=nickname,photo_50&order=hints");
+        String friends = new NetWork().readData("https://api.vk.com/method/friends.get?user_id=" + workApi.user.getCurrentUserId() + "&fields=nickname,photo_50,online&order=hints");
+        Log.d("friends",friends);
         JSONObject object = new JSONObject(friends);
         JSONArray jsonArray = object.getJSONArray("response");
         for (int i=0;i<jsonArray.length();i++)
@@ -52,6 +57,25 @@ public class workApi
             String name=jsonArray.getJSONObject(i).getString("first_name")+" "+jsonArray.getJSONObject(i).getString("last_name");
             String uid=jsonArray.getJSONObject(i).getString("uid");
             String avatarUrl=jsonArray.getJSONObject(i).getString("photo_50");
+            String stringOnline = jsonArray.getJSONObject(i).getString("online");
+            boolean online=stringOnline.equals("1")?true:false;
+            friendsList.add(new Friend(uid,name,avatarUrl,online));
+        }
+        return friendsList;
+    }
+    private List<Friend> getFriendsOnlineList() throws IOException, JSONException {
+        List<Friend> friendsList = new ArrayList<>();
+        String friends = new NetWork().readData("https://api.vk.com/method/friends.get?user_id=" + workApi.user.getCurrentUserId() + "&fields=nickname,photo_50,online&order=hints");
+        Log.d("friends",friends);
+        JSONObject object = new JSONObject(friends);
+        JSONArray jsonArray = object.getJSONArray("response");
+        for (int i=0;i<jsonArray.length();i++)
+        {
+            String name=jsonArray.getJSONObject(i).getString("first_name")+" "+jsonArray.getJSONObject(i).getString("last_name");
+            String uid=jsonArray.getJSONObject(i).getString("uid");
+            String avatarUrl=jsonArray.getJSONObject(i).getString("photo_50");
+            String online=jsonArray.getJSONObject(i).getString("online");
+            if (online.equals("1"))
             friendsList.add(new Friend(uid,name,avatarUrl));
         }
         return friendsList;

@@ -15,6 +15,7 @@ public class Friend
     private String fullName;
     private String avatar_url;
     private Bitmap avatar;
+    private boolean online;
     private List<String> photosUrl = new ArrayList<>();
     private List<Bitmap> photos;
     private List<String> messages = new ArrayList<>();
@@ -37,6 +38,13 @@ public class Friend
         this.userId=userId;
         this.fullName=fullName;
         this.avatar_url=avatar_url;
+    }
+    Friend(String userId, String fullName, String avatar_url, boolean online)
+    {
+        this.userId=userId;
+        this.fullName=fullName;
+        this.avatar_url=avatar_url;
+        this.online=online;
     }
 
     public void downLoadAvatar() throws IOException {
@@ -111,5 +119,13 @@ public class Friend
     public void addFromTo(List<String> messages)
     {
         this.fromTo.addAll(messages);
+    }
+
+    public boolean isOnline() {
+        return online;
+    }
+
+    public void setOnline(boolean online) {
+        this.online = online;
     }
 }

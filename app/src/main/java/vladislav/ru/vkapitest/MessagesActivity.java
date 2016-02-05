@@ -25,6 +25,9 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -75,9 +78,11 @@ public class MessagesActivity extends Activity{
         EditText editText = (EditText)findViewById(R.id.editText);
         String s = editText.getText().toString();
 
-        String newS = new String(s.getBytes("UTF-8"), "windows-1251");
-        Log.d("mess1", s);
-        new SendMessage().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,"ааап");
+        String newS = new String(s.getBytes("us-ascii"), "UTF-8");
+        Log.d("mess1", Charset.defaultCharset().name());
+
+        new SendMessage().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, URLEncoder.encode(s,"UTF-8"));
+        editText.setText("");
     }
 
     class SendMessage extends AsyncTask<String, Void, Void>

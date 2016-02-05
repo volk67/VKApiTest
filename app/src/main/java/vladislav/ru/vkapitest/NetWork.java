@@ -2,6 +2,7 @@ package vladislav.ru.vkapitest;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -10,6 +11,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -40,7 +42,9 @@ public class NetWork
 
     private InputStream setConnectWithHttp(String urls) throws IOException
     {
+        String s = URLEncoder.encode(urls,"UTF-8");
         URL url = new URL(urls);
+        Log.d("url",url.toString());
         HttpURLConnection urlConnection = (HttpURLConnection)url.openConnection();
         urlConnection.setRequestMethod("GET");
         urlConnection.connect();
@@ -49,6 +53,7 @@ public class NetWork
     private InputStream setConnectWithHttps(String urls) throws IOException
     {
         URL url = new URL(urls);
+        Log.d("url",url.toString());
         HttpsURLConnection urlConnection = (HttpsURLConnection)url.openConnection();
         urlConnection.setRequestMethod("GET");
         urlConnection.connect();

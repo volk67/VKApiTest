@@ -19,6 +19,7 @@ public class UserData
     private String avatarUrl;
     private Bitmap avatar;
     private static List<Friend> myFriends;
+    private static List<Friend> myFriendsOnline;
     //public static ArrayList<Map<String,Object>> temp = new ArrayList<Map<String,Object>>();
     private static String currentFriend;
     private static ArrayList<Bitmap> iconBitmap=new ArrayList<Bitmap>();
@@ -29,6 +30,14 @@ public class UserData
 
     public List<Friend> getMyFriends() {
         return myFriends;
+    }
+
+    public static List<Friend> getMyFriendsOnline() {
+        return myFriendsOnline;
+    }
+
+    public static void setMyFriendsOnline(List<Friend> myFriendsOnline) {
+        UserData.myFriendsOnline = myFriendsOnline;
     }
 
     public String getCurrentUserId() {
@@ -80,5 +89,8 @@ public class UserData
     }
     public void downLoadAvatar() throws IOException {
         this.avatar=new NetWork().readBitmap(avatarUrl);
+
     }
+
+
 }
